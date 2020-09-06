@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 // TODO - this data contract is invalid right now. Needs more development if to be used.
@@ -56,6 +57,11 @@ type player struct {
 	stats_id               int
 }
 
+const (
+	// See http://golang.org/pkg/time/#Parse
+	timeFormat = "2006-01-02"
+)
+
 func main() {
 
 	sleeperAPI := "https://api.sleeper.app/v1/players/nfl"
@@ -80,6 +86,13 @@ func main() {
 		var decodedPlayer map[string]string
 		json.Unmarshal(player, &decodedPlayer)
 
-		fmt.Println(decodedPlayer["full_name"])
+		fullName := decodedPlayer["full_name"]
+		position := decodedPlayer["position"]
+		rawDOB := decodedPlayer["birth_date"]
+
+		DOB, _ := time.Parse(timeFormat, rawDOB)
+		age := time.Since(DOB)
+
+		fmt.Printf("%s,%s,%f\n", fullName, position, age.Hours()/(24.0*365))
 	}
 }
